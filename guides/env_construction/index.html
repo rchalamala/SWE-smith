@@ -984,16 +984,18 @@ specifically at commit <a href="https://github.com/Instagram/MonkeyType/tree/70c
 <p>Coming soon!</p>
 <h2 id="create-an-execution-environment">Create an Execution Environment</h2>
 <p>First, create the conda environment for the target repository.
-</p><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>install_repo.sh<span class="w"> </span><span class="se">\</span>
+</p><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84
 </code></pre></div>
 where <code>install_repo.sh</code> is the script that installs the repository.
 (<a href="https://github.com/SWE-bench/SWE-smith/blob/main/configs/install_repo.sh">Example</a>)<p></p>
-<p>If successful, two artifacts will be produced under <code>logs/build_repo/records/</code>:
-* <code>sweenv_[repo + commit].yml</code>: A dump of the conda environment that was created.
-* <code>sweenv_[repo + commit].sh</code>: A log of the installation process.</p>
+<p>If successful, two artifacts will be produced under <code>logs/build_repo/env/&lt;org&gt;__&lt;repo&gt;.&lt;hash&gt;</code>:</p>
+<ul>
+<li><code>sweenv_[repo + commit].yml</code>: A dump of the conda environment that was created.</li>
+<li><code>sweenv_[repo + commit].sh</code>: A log of the installation process.</li>
+</ul>
 <p>Next, run the following command to create a Docker image for the repository.</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.create_images<span class="w"> </span>--repos<span class="w"> </span>Instagram/MonkeyType
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.create_images
 </code></pre></div>
 <p>This command will create two artifacts:
 1. A mirror of the original repository at the specified commit, created under <a href="https://github.com/orgs/swesmith/repositories"><code>swesmith</code></a>. To change the organization, you can...
