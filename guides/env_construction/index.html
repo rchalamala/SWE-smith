@@ -995,13 +995,20 @@ where <code>install_repo.sh</code> is the script that installs the repository.
 <li><code>sweenv_[repo + commit].sh</code>: A log of the installation process.</li>
 </ul>
 <p>Next, run the following command to create a Docker image for the repository.</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.create_images
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.create_images<span class="w"> </span>-r<span class="w"> </span>MonkeyType
 </code></pre></div>
 <p>This command will create two artifacts:
 1. A mirror of the original repository at the specified commit, created under <a href="https://github.com/orgs/swesmith/repositories"><code>swesmith</code></a>. To change the organization, you can...
     * Pass in an <code>--org</code> argument, or
     * (If built from source) Change <code>ORG_NAME_GH</code> in <code>swesmith/constants.py</code>
 2. A Docker image (<code>swesmith.x86_64.&lt;repo&gt;.&lt;commit&gt;</code>) which contains the installed codebase.</p>
+<p>!!! note "<code>create_images</code> arguments</p>
+<pre><code>By default, without `-r`, the command will build images for *all* SWE-smith repositories (300+ as of 12/2025).
+
+`-r`: Select specific repositories to build using fuzzy matching (e.g., `-r django` matches any repo containing "django").
+
+`-f`: Force rebuild images even if they already exist locally.
+</code></pre>
 <p>It's good practice to check that your Docker image works as expected.
 </p><div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>swesmith.x86_64.instagram__monkeytype.70c3acf6
 </code></pre></div>
