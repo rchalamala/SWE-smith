@@ -107,7 +107,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#automatically-install-repos-with-swe-agent" class="md-skip">
+        <a href="#build-environments" class="md-skip">
           Skip to content
         </a>
       
@@ -330,6 +330,28 @@
     
   
   Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../env_construction_py/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Miscellaneous
 
         </a>
       </li>
@@ -671,6 +693,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -712,6 +736,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -898,6 +924,95 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Miscellaneous
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Miscellaneous
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../env_construction_py/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build Python Environments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -914,6 +1029,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -970,10 +1087,9 @@
   
 
 
-  <h1>Build Environments</h1>
-
-<p>SWE-smith enables automatic construction of execution environments for repositories.
-We'll review the two steps of this process:</p>
+<h1 id="build-environments">Build Environments</h1>
+<p>SWE-smith enables automatic conversion of code repositories into reinforcement learning environments.</p>
+<p>We'll review the two steps of this process:</p>
 <ol>
 <li>SWE-agent + LM attempts to install a repository + run the testing suite.</li>
 <li>Construct an execution environment (Docker image).</li>
@@ -985,7 +1101,7 @@ specifically at commit <a href="https://github.com/Instagram/MonkeyType/tree/70c
 <div class="admonition note">
 <p class="admonition-title">Python installation scripts</p>
 <p>Early on in SWE-smith's development, we focused exclusively on Python repositories and wrote Python-specific scripts for automatic repo instllation.
-More information <a href="guides/env_construction_py.md">here</a></p>
+More information <a href="../env_construction_py/">here</a></p>
 </div>
 <h2 id="create-an-execution-environment">Create an Execution Environment</h2>
 <p>Run the following command to create a Docker image for the repository.</p>
