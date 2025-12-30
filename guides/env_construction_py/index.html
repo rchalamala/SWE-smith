@@ -5,13 +5,9 @@
       
       
       
-        <link rel="canonical" href="https://swe-smith.com/guides/env_construction/">
+        <link rel="canonical" href="https://swe-smith.com/guides/env_construction_py/">
       
       
-        <link rel="prev" href="../">
-      
-      
-        <link rel="next" href="../create_instances/">
       
       
         
@@ -22,7 +18,7 @@
     
     
       
-        <title>Build Environments - SWE-smith Documentation</title>
+        <title>Python Environment Options - SWE-smith Documentation</title>
       
     
     
@@ -107,7 +103,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#automatically-install-repos-with-swe-agent" class="md-skip">
+        <a href="#python-environment-options" class="md-skip">
           Skip to content
         </a>
       
@@ -163,7 +159,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Build Environments
+              Python Environment Options
             
           </span>
         </div>
@@ -317,12 +313,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../" class="md-tabs__link">
           
   
@@ -580,8 +574,6 @@
       
   
   
-    
-  
   
   
     
@@ -607,17 +599,14 @@
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3">
         
           
           <div class="md-nav__link md-nav__container">
@@ -639,13 +628,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -662,35 +651,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Build Environments
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../env_construction/" class="md-nav__link">
         
   
   
@@ -706,46 +670,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#automatically-install-repos-with-swe-agent" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automatically Install Repos with SWE-agent
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-an-execution-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Create an Execution Environment
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -915,6 +839,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -923,10 +849,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#automatically-install-repos-with-swe-agent" class="md-nav__link">
+  <a href="#quickstart" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automatically Install Repos with SWE-agent
+        Quickstart
       
     </span>
   </a>
@@ -934,13 +860,74 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-an-execution-environment" class="md-nav__link">
+  <a href="#walkthrough" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Create an Execution Environment
+        Walkthrough
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-version-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python Version Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-dependency-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dependency Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smoke-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smoke Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -962,7 +949,7 @@
 
 
   
-    <a href="https://github.com/SWE-bench/SWE-smith/edit/main/docs/guides/env_construction.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/SWE-bench/SWE-smith/edit/main/docs/guides/env_construction_py.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"></path></svg>
     </a>
@@ -970,48 +957,103 @@
   
 
 
-  <h1>Build Environments</h1>
-
-<p>SWE-smith enables automatic construction of execution environments for repositories.
-We'll review the two steps of this process:</p>
+<h1 id="python-environment-options">Python Environment Options</h1>
+<p>This guide covers Python-specific options for customizing repository installation when using <code>try_install_py</code>.</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>The following is a quick demonstration for how to use the <code>try_install_py</code> script.
+For more details, refer to the "Running Example" section.</p>
+<p></p><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84
+</code></pre></div>
+where <code>install_repo.sh</code> is the script that installs the repository.
+(<a href="https://github.com/SWE-bench/SWE-smith/blob/main/configs/install_repo.sh">Example</a>)<p></p>
+<p>If successful, two artifacts will be produced under <code>logs/build_repo/env/&lt;org&gt;__&lt;repo&gt;.&lt;hash&gt;</code>:</p>
+<ul>
+<li><code>sweenv_[repo + commit].yml</code>: A dump of the conda environment that was created.</li>
+<li><code>sweenv_[repo + commit].sh</code>: A log of the installation process.</li>
+</ul>
+<h2 id="walkthrough">Walkthrough</h2>
+<p>Throughout this guide, we'll use the <a href="https://github.com/Instagram/MonkeyType/">Instagram/MonkeyType</a> repository at commit <a href="https://github.com/Instagram/MonkeyType/tree/70c3acf62950be5dfb28743c7a719bfdecebcd84"><code>70c3acf</code></a> as our running example.</p>
+<h3 id="python-version-selection">Python Version Selection</h3>
+<p>By default, the installation script creates a conda environment with Python 3.10. You can specify a different Python version using the <code>--python-version</code> flag:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--python-version<span class="w"> </span><span class="m">3</span>.11
+</code></pre></div>
+<p>This sets the <code>SWESMITH_PYTHON_VERSION</code> environment variable, which the install script uses when creating the conda environment:</p>
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>testbed<span class="w"> </span><span class="s2">"python=</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>-yq
+</code></pre></div>
+<h3 id="test-dependency-installation">Test Dependency Installation</h3>
+<p>The install script now tries multiple strategies to install test dependencies, in order:</p>
 <ol>
-<li>SWE-agent + LM attempts to install a repository + run the testing suite.</li>
-<li>Construct an execution environment (Docker image).</li>
+<li><strong>Extras</strong>: <code>pip install -e ".[test]"</code></li>
+<li><strong>Requirements file</strong>: <code>pip install -r requirements-test.txt</code></li>
+<li><strong>Profile hooks</strong>: Custom install commands from the repository profile</li>
 </ol>
-<p>For this section, we'll use the <a href="https://github.com/Instagram/MonkeyType/">Instagram/MonkeyType</a> repository as a running example, 
-specifically at commit <a href="https://github.com/Instagram/MonkeyType/tree/70c3acf62950be5dfb28743c7a719bfdecebcd84"><code>70c3acf</code></a>.</p>
-<h2 id="automatically-install-repos-with-swe-agent">Automatically Install Repos with SWE-agent</h2>
-<p>Coming soon!</p>
-<div class="admonition note">
-<p class="admonition-title">Python installation scripts</p>
-<p>Early on in SWE-smith's development, we focused exclusively on Python repositories and wrote Python-specific scripts for automatic repo instllation.
-More information <a href="guides/env_construction_py.md">here</a></p>
-</div>
-<h2 id="create-an-execution-environment">Create an Execution Environment</h2>
-<p>Run the following command to create a Docker image for the repository.</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.create_images<span class="w"> </span>-r<span class="w"> </span>MonkeyType
+<p>For MonkeyType, the install script will successfully use the extras approach since <code>setup.py</code> defines test dependencies in <code>extras_require</code>.</p>
+<p><strong>Adding Extra Test Dependencies.</strong> If a repository needs additional test utilities beyond its declared dependencies, use <code>--extra-test-deps</code>:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--extra-test-deps<span class="w"> </span><span class="s2">"hypothesis coverage"</span>
 </code></pre></div>
-<p>This command will create two artifacts:
-1. A mirror of the original repository at the specified commit, created under <a href="https://github.com/orgs/swesmith/repositories"><code>swesmith</code></a>. To change the organization, you can...
-    * Pass in an <code>--org</code> argument, or
-    * (If built from source) Change <code>ORG_NAME_GH</code> in <code>swesmith/constants.py</code>
-2. A Docker image (<code>swesmith.x86_64.&lt;repo&gt;.&lt;commit&gt;</code>) which contains the installed codebase.</p>
-<div class="admonition note">
-<p class="admonition-title"><code>create_images</code> arguments</p>
-<p>By default, without <code>-r</code>, the command will build images for <em>all</em> SWE-smith repositories (300+ as of 12/2025).</p>
-<p><code>-r</code>: Select specific repositories to build using fuzzy matching (e.g., <code>-r django</code> matches any repo containing "django").</p>
-<p><code>-f</code>: Force rebuild images even if they already exist locally.</p>
-</div>
-<p>It's good practice to check that your Docker image works as expected.
-</p><div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>swebench/swesmith.x86_64.instagram__monkeytype.70c3acf6
+<p>This passes the packages to the install script via <code>SWESMITH_EXTRA_TEST_DEPS</code>, which installs them after the main test dependencies:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>hypothesis<span class="w"> </span>coverage
 </code></pre></div>
-Within the container, run the testing suite (e.g. <code>pytest</code>) to ensure that the codebase is functioning as expected.<p></p>
-<div class="admonition note">
-<p class="admonition-title">Get existing Docker images</p>
-<p>All repositories represented in the SWE-smith <a href="https://huggingface.co/datasets/SWE-bench/SWE-smith">dataset</a> are available to download. Simply run:
-</p><div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.download_images
+<h3 id="smoke-testing">Smoke Testing</h3>
+<p>After installation, the script runs a smoke test to verify the environment works correctly.
+This flag is not necessary, but provided to enable easy checking.
+In general, we encourage putting all necessary installation steps in <code>install_repo.sh</code>.</p>
+<p><strong>Default Behavior.</strong> If pytest is available in the environment, the default smoke test is:
+</p><div class="highlight"><pre><span></span><code>pytest<span class="w"> </span>-q<span class="w"> </span>--maxfail<span class="o">=</span><span class="m">1</span>
 </code></pre></div><p></p>
-</div>
+<p>For MonkeyType, this would run:
+</p><div class="highlight"><pre><span></span><code>&gt;<span class="w"> </span>Running<span class="w"> </span>smoke<span class="w"> </span>test:<span class="w"> </span>pytest<span class="w"> </span>-q<span class="w"> </span>--maxfail<span class="o">=</span><span class="m">1</span>
+&gt;<span class="w"> </span>Smoke<span class="w"> </span><span class="nb">test</span><span class="w"> </span>passed
+</code></pre></div><p></p>
+<p><strong>Custom Smoke Test.</strong> You can specify a custom smoke test command:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--smoke-cmd<span class="w"> </span><span class="s2">"python -m pytest tests/test_cli.py -v"</span>
+</code></pre></div>
+<p><strong>Skipping Smoke Test.</strong> To skip the smoke test entirely:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--skip-smoke
+</code></pre></div>
+<h3 id="debugging-options">Debugging Options</h3>
+<p><strong>Force Overwrite.</strong> If the environment file already exists, you'll be prompted to overwrite it. Use <code>--force</code> to skip the prompt:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--force
+</code></pre></div>
+<p><strong>Keep Environments for Inspection.</strong> By default, the script cleans up the cloned repository and conda environment after completion. Use <code>--no_cleanup</code> to keep them for debugging:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--no_cleanup
+</code></pre></div>
+<p>After running with this flag, you can inspect the environment:</p>
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>activate<span class="w"> </span>testbed
+<span class="nb">cd</span><span class="w"> </span>MonkeyType
+pytest<span class="w"> </span>tests/
+</code></pre></div>
+<h3 id="complete-example">Complete Example</h3>
+<p>Here's a complete example using MonkeyType with multiple options:</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>swesmith.build_repo.try_install_py<span class="w"> </span>Instagram/MonkeyType<span class="w"> </span>configs/install_repo.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--commit<span class="w"> </span>70c3acf62950be5dfb28743c7a719bfdecebcd84<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--python-version<span class="w"> </span><span class="m">3</span>.11<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--extra-test-deps<span class="w"> </span><span class="s2">"hypothesis"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--smoke-cmd<span class="w"> </span><span class="s2">"pytest tests/test_cli.py -q"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--force
+</code></pre></div>
+<p>This will:
+- Clone MonkeyType at commit <code>70c3acf</code>
+- Create a conda environment with Python 3.11
+- Install the repository in editable mode
+- Install test dependencies (found via <code>[test]</code> extras)
+- Install <code>hypothesis</code> as an additional test dependency
+- Run <code>pytest tests/test_cli.py -q</code> as the smoke test
+- Force overwrite any existing environment file
+- Clean up the repository and environment after completion</p>
 
 
 
@@ -1077,44 +1119,6 @@ Within the container, run the testing suite (e.g. <code>pytest</code>) to ensure
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer">
-        
-          
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tutorials">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Tutorials
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../create_instances/" class="md-footer__link md-footer__link--next" aria-label="Next: Create Instances">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Create Instances
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"></path></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
