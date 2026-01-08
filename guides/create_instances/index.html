@@ -790,6 +790,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Procedural Modification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-at-scale-on-modal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running at Scale on Modal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1075,6 +1092,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Procedural Modification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-at-scale-on-modal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running at Scale on Modal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1219,6 +1253,34 @@ Identical to LM Generated task instances, but the artifacts are instead named:</
 </ul>
 <p>Where <code>&lt;name&gt;</code> refers to the specific identifier for the procedural modification technique.
 There are 13 (and counting) in total.</p>
+<h3 id="running-at-scale-on-modal">Running at Scale on Modal</h3>
+<p>For generating and validating bugs across many repositories, use the <code>scripts/bug_gen.py</code> script which runs on <a href="https://modal.com">Modal</a> for scalable cloud execution.</p>
+<p><strong>Basic Usage</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate + validate bugs for all JavaScript repos</span>
+modal<span class="w"> </span>run<span class="w"> </span>scripts/bug_gen.py<span class="w"> </span>--language<span class="w"> </span>javascript
+
+<span class="c1"># Process specific repos only</span>
+modal<span class="w"> </span>run<span class="w"> </span>scripts/bug_gen.py<span class="w"> </span>--language<span class="w"> </span>javascript<span class="w"> </span>--repos<span class="w"> </span><span class="s2">"owner/repo1,owner/repo2"</span>
+</code></pre></div>
+<p><strong>Two-Phase Pipeline</strong></p>
+<p>The script runs two phases automatically:</p>
+<ol>
+<li><strong>Generation Phase</strong>: Creates bug candidates for each repository using procedural modifications.</li>
+<li><strong>Validation Phase</strong>: Runs pre-gold (baseline) tests, then post-gold tests to verify which bugs actually break tests. Results are persisted to the Modal Volume.</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Incremental Processing</p>
+<p>The script automatically skips already-processed repos and patches. You can safely re-run the command to continue from where it left off.</p>
+</div>
+<p><strong>Monitor Progress</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check current stats without running generation/validation</span>
+modal<span class="w"> </span>run<span class="w"> </span>scripts/bug_gen.py<span class="w"> </span>--language<span class="w"> </span>javascript<span class="w"> </span>--show-stats
+</code></pre></div>
+<p>This displays a table with generated, validated, and valid bug counts per repository.</p>
+<p><strong>Logging to File</strong></p>
+<p>To save output to a log file with real-time unbuffered streaming:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PYTHONUNBUFFERED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>stdbuf<span class="w"> </span>-oL<span class="w"> </span>-eL<span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>modal<span class="w"> </span>run<span class="w"> </span>--detach<span class="w"> </span>scripts/bug_gen.py<span class="w"> </span>--language<span class="w"> </span>javascript<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>validation.log
+</code></pre></div>
 <h2 id="pr-mirroring">PR Mirroring</h2>
 <p><strong>How does it work?</strong></p>
 <div style="text-align:center">
