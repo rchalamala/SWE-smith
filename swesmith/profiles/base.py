@@ -372,7 +372,7 @@ class RepoProfile(ABC, metaclass=SingletonMeta):
                 'git config user.email "swesmith@anon.com"',
                 "rm -rf .github/workflows",
                 "rm -rf .github/dependabot.y*",
-                "git add .",
+                "git add --force .",
                 "git commit --no-gpg-sign -m 'Initial commit'",
                 "git branch -M main",
                 f"git remote add origin git@github.com:{self.mirror_name}.git",
