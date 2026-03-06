@@ -23,7 +23,7 @@ Coming soon!
 Run the following command to create a Docker image for the repository.
 
 ```bash
-python -m swesmith.build_repo.create_images -r MonkeyType
+uv run python -m swesmith.build_repo.create_images -r MonkeyType
 ```
 
 This command will create two artifacts:
@@ -50,5 +50,5 @@ Within the container, run the testing suite (e.g. `pytest`) to ensure that the c
 
     All repositories represented in the SWE-smith [dataset](https://huggingface.co/datasets/SWE-bench/SWE-smith) are available to download. Simply run:
     ```bash
-    python -m swesmith.build_repo.download_images
+    uv run python -m swesmith.build_repo.download_images
     ```

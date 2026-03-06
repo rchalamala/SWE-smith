@@ -1,5 +1,4 @@
 import pytest
-from swesmith.constants import ENV_NAME
 from unittest.mock import patch, MagicMock, mock_open
 from pathlib import Path
 
@@ -14,24 +13,19 @@ def test_python_profile_defaults():
     profile = PythonProfile()
 
     assert profile.python_version == "3.10"
-    assert profile.install_cmds == ["python -m pip install -e ."]
-    assert profile.test_cmd == (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest --disable-warnings --color=no --tb=no --verbose"
-    )
+    assert profile.install_cmds == ["uv pip install -e ."]
+    assert profile.test_cmd == "pytest --disable-warnings --color=no --tb=no --verbose"
 
 
 def test_python_profile_build_image():
     """Test PythonProfile.build_image method"""
     profile = Addict75284f95()
 
-    mock_env_yml_content = "name: test_env\ndependencies:\n  - python=3.10"
+    mock_env_spec_content = "pytest==8.4.0\ncoverage==7.10.0\n"
 
-    m = mock_open(read_data=mock_env_yml_content)
+    m = mock_open(read_data=mock_env_spec_content)
     with (
         patch("builtins.open", m),
-        patch("swesmith.profiles.python.get_dockerfile_env", return_value="FROM test"),
         patch("pathlib.Path.mkdir"),
         patch("subprocess.run") as mock_run,
     ):
@@ -48,6 +42,9 @@ def test_python_profile_build_image():
         written_content = ""
         for c in m().write.call_args_list:
             written_content += c.args[0]
+        assert "uv venv --python 3.10 --seed .venv" in written_content
+        assert "uv pip install -r swesmith_environment.txt" in written_content
+        assert "curl -LsSf https://astral.sh/uv/install.sh | sh" in written_content
 
 
 def test_python_profile_log_parser():
@@ -80,14 +77,14 @@ No test results here
     assert result == {}
 
 
-def test_python_profile_env_yml_property():
-    """Test PythonProfile._env_yml property"""
+def test_python_profile_env_spec_property():
+    """Test PythonProfile._env_spec property"""
     profile = Addict75284f95()
 
     expected_path = Path(
-        f"logs/build_images/env/{profile.repo_name}/sweenv_{profile.repo_name}.yml"
+        f"logs/build_images/env/{profile.repo_name}/sweenv_{profile.repo_name}.txt"
     )
-    assert profile._env_yml == expected_path
+    assert profile._env_spec == expected_path
 
 
 def test_autograd_log_parser():
@@ -131,7 +128,7 @@ def test_python_profile_custom_install_cmds():
     from swesmith.profiles.python import Apispec8b421526
 
     profile = Apispec8b421526()
-    assert profile.install_cmds == ["pip install -e .[dev]"]
+    assert profile.install_cmds == ["uv pip install -e .[dev]"]
     assert profile.install_cmds != PythonProfile().install_cmds
 
 
@@ -141,11 +138,7 @@ def test_python_profile_custom_test_cmd():
     from swesmith.profiles.python import Gpxpy09fc46b3
 
     profile = Gpxpy09fc46b3()
-    assert profile.test_cmd == (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest test.py --verbose --color=no --tb=no --disable-warnings"
-    )
+    assert profile.test_cmd == "pytest test.py --verbose --color=no --tb=no --disable-warnings"
     assert profile.test_cmd != PythonProfile().test_cmd
 
 
@@ -176,7 +169,7 @@ def test_python_profile_complex_install_cmds():
 
     profile = FvcoreA491d5b9()
     assert len(profile.install_cmds) > 1
-    assert any("pip install" in cmd for cmd in profile.install_cmds)
+    assert any("uv pip install" in cmd for cmd in profile.install_cmds)
 
 
 def test_python_profile_registry_integration():
@@ -221,11 +214,10 @@ def test_python_profile_build_image_error_handling():
     """Test PythonProfile.build_image error handling"""
     profile = Addict75284f95()
 
-    mock_env_yml_content = "name: test_env\ndependencies:\n  - python=3.10"
+    mock_env_spec_content = "pytest==8.4.0\ncoverage==7.10.0\n"
 
     with (
-        patch("builtins.open", mock_open(read_data=mock_env_yml_content)),
-        patch("swesmith.profiles.python.get_dockerfile_env", return_value="FROM test"),
+        patch("builtins.open", mock_open(read_data=mock_env_spec_content)),
         patch("pathlib.Path.mkdir"),
         patch("subprocess.run", side_effect=Exception("Build failed")),
     ):

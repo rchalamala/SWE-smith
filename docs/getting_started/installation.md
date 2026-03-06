@@ -3,7 +3,9 @@
 For the latest stable release
 
 ```bash
-pip install swesmith
+uv venv
+source .venv/bin/activate
+uv pip install swesmith
 ```
 
 For the latest development version
@@ -17,5 +19,5 @@ cd SWE-smith
 If you plan to contribute to SWE-smith, please also perform:
 
 ```bash
-pre-commit install
+uv run pre-commit install
 ```

@@ -1,18 +1,18 @@
 """
 Purpose: Test out whether a set of installation commands works for a given repository at a specific commit.
 
-Usage: python -m swesmith.build_repo.try_install_py owner/repo --commit <commit>
+Usage: uv run python -m swesmith.build_repo.try_install_py owner/repo --commit <commit>
 """
 
 import argparse
 import os
 import subprocess
 
-from swesmith.constants import ENV_NAME
 from swesmith.profiles.python import PythonProfile
 
 
-DEFAULT_PROFILE_INSTALL_CMDS = ["python -m pip install -e ."]
+DEFAULT_PROFILE_INSTALL_CMDS = ["uv pip install -e ."]
+DEFAULT_VENV_DIR = ".venv"
 
 
 def _profile_install_cmds(profile: PythonProfile) -> str | None:
@@ -26,17 +26,16 @@ def _profile_install_cmds(profile: PythonProfile) -> str | None:
 
 
 def _pytest_available(env: dict) -> bool:
-    """Check if pytest is importable inside the target conda env."""
+    """Check if pytest is importable inside the target uv-managed virtualenv."""
     check_cmd = (
-        f"conda run -n {ENV_NAME} python - <<'PY'\n"
+        f"source {DEFAULT_VENV_DIR}/bin/activate && python - <<'PY'\n"
         "import importlib.util, sys\n"
         "sys.exit(0 if importlib.util.find_spec('pytest') else 1)\n"
         "PY"
     )
     result = subprocess.run(
-        check_cmd,
+        ["bash", "-lc", check_cmd],
         check=False,
-        shell=True,
         env=env,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -44,7 +43,7 @@ def _pytest_available(env: dict) -> bool:
     return result.returncode == 0
 
 
-def cleanup(repo_name: str, env_name: str | None = None):
+def cleanup(repo_name: str):
     if os.path.exists(repo_name):
         subprocess.run(
             f"rm -rf {repo_name}",
@@ -54,27 +53,6 @@ def cleanup(repo_name: str, env_name: str | None = None):
             stderr=subprocess.DEVNULL,
         )
         print("> Removed repository")
-    # If env not found, skip removal
-    if env_name is not None:
-        try:
-            env_list = subprocess.run(
-                "conda env list", check=True, shell=True, text=True, capture_output=True
-            ).stdout
-            if env_name in env_list:
-                subprocess.run(
-                    f"conda env remove -n {env_name} -y",
-                    check=True,
-                    shell=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                print("> Removed conda environment")
-            else:
-                print(f"> Environment '{env_name}' not found, skipping removal")
-        except subprocess.CalledProcessError as e:
-            print(
-                f"> Warning: Failed to check/remove conda environment '{env_name}': {e}"
-            )
 
 
 def main(
@@ -139,10 +117,10 @@ def main(
         p.commit = commit
 
         if (
-            os.path.exists(os.path.join("..", str(p._env_yml)))
+            os.path.exists(os.path.join("..", str(p._env_spec)))
             and not force
             and input(
-                f"> Environment file {p._env_yml} already exists. Do you want to overwrite it? (y/n) "
+                f"> Environment snapshot {p._env_spec} already exists. Do you want to overwrite it? (y/n) "
             )
             != "y"
         ):
@@ -164,44 +142,44 @@ def main(
             if resolved_smoke_cmd:
                 print(f"> Running smoke test: {resolved_smoke_cmd}")
                 subprocess.run(
-                    f"conda run -n {ENV_NAME} {resolved_smoke_cmd}",
+                    [
+                        "bash",
+                        "-lc",
+                        f"source {DEFAULT_VENV_DIR}/bin/activate && {resolved_smoke_cmd}",
+                    ],
                     check=True,
-                    shell=True,
                     env=env,
                 )
                 print("> Smoke test passed")
             else:
                 print("> Skipping smoke test (pytest not available)")
 
-        # If installation succeeded, export the conda environment + record install script
+        # If installation succeeded, export the uv environment + record install script
         os.chdir("..")
-        p._env_yml.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(
-            f"conda env export -n {ENV_NAME} > {p._env_yml}",
-            check=True,
-            shell=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-
-        # Edit env.yml such that name of package is excluded from `pip`
-        with open(p._env_yml, "r") as f:
-            lines = f.readlines()
-        with open(p._env_yml, "w") as f:
-            for line in lines:
-                # Exclude the package by both repository name and lowercase package name
-                if line.strip().startswith(f"- {p.repo}==") or line.strip().startswith(
-                    f"- {p.repo.lower()}=="
-                ):
-                    continue
-                f.write(line)
+        p._env_spec.parent.mkdir(parents=True, exist_ok=True)
+        with open(p._env_spec, "w") as spec_file:
+            subprocess.run(
+                [
+                    "bash",
+                    "-lc",
+                    (
+                        f"cd {p.repo} && "
+                        f"source {DEFAULT_VENV_DIR}/bin/activate && "
+                        "uv pip freeze --exclude-editable --exclude pip"
+                    ),
+                ],
+                check=True,
+                env=env,
+                stdout=spec_file,
+                stderr=subprocess.DEVNULL,
+            )
 
         with open(install_script) as install_f:
             install_lines = [
                 l.strip("\n") for l in install_f.readlines() if len(l.strip()) > 0
             ]
 
-        with open(str(p._env_yml).replace(".yml", ".sh"), "w") as f:
+        with open(str(p._env_spec).replace(".txt", ".sh"), "w") as f:
             f.write(
                 "\n".join(
                     [
@@ -213,13 +191,13 @@ def main(
                 )
                 + "\n"
             )
-        print(f"> Exported conda environment to {p._env_yml}")
+        print(f"> Exported uv environment snapshot to {p._env_spec}")
     except Exception as e:
         print(f"> Installation procedure failed: {e}")
     finally:
         os.chdir(base_cwd)
         if not no_cleanup:
-            cleanup(p.repo, ENV_NAME)
+            cleanup(p.repo)
 
 
 if __name__ == "__main__":
@@ -242,25 +220,25 @@ if __name__ == "__main__":
     parser.add_argument(
         "--no_cleanup",
         action="store_true",
-        help="Do not remove the repository and conda environment after installation",
+        help="Do not remove the repository after installation",
     )
     parser.add_argument(
         "-f",
         "--force",
         action="store_true",
-        help="Force overwrite of existing conda environment file (if it exists)",
+        help="Force overwrite of existing environment snapshot file (if it exists)",
     )
     parser.add_argument(
         "-p",
         "--python-version",
         type=str,
-        help="Python version to use when creating the conda environment",
+        help="Python version to use when creating the uv virtual environment",
         default=None,
     )
     parser.add_argument(
         "--smoke-cmd",
         type=str,
-        help="Optional smoke test command to run inside the conda env (default: pytest -q --maxfail=1 if pytest is installed)",
+        help="Optional smoke test command to run inside the uv virtual environment (default: pytest -q --maxfail=1 if pytest is installed)",
         default=None,
     )
     parser.add_argument(
@@ -271,7 +249,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--extra-test-deps",
         type=str,
-        help="Additional space-separated pip packages to install as test deps (passed to install script)",
+        help="Additional space-separated packages to install as test deps (passed to install script)",
         default=None,
     )
 

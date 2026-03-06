@@ -9,10 +9,55 @@ from swebench.harness.constants import (
     KEY_INSTANCE_ID,
     TestStatus,
 )
-from swebench.harness.dockerfiles import get_dockerfile_env
-from swesmith.constants import LOG_DIR_ENV, ENV_NAME, INSTANCE_REF, ORG_NAME_DH
+from swesmith.constants import (
+    LOG_DIR_ENV,
+    ENV_NAME,
+    INSTANCE_REF,
+    UBUNTU_VERSION,
+)
 from swesmith.profiles.base import RepoProfile, registry
 from swesmith.profiles.utils import INSTALL_BAZEL, INSTALL_CMAKE
+
+
+PYTHON_ENV_DOCKERFILE = f"""
+FROM --platform={{platform}} ubuntu:{UBUNTU_VERSION}
+
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+ENV PATH=/root/.local/bin:$PATH
+
+RUN apt update && apt install -y \\
+curl \\
+git \\
+build-essential \\
+libffi-dev \\
+libtiff-dev \\
+python3 \\
+python3-dev \\
+python3-venv \\
+python3-pip \\
+python-is-python3 \\
+jq \\
+ca-certificates \\
+pkg-config \\
+locales \\
+locales-all \\
+tzdata \\
+&& rm -rf /var/lib/apt/lists/*
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+RUN adduser --disabled-password --gecos 'dog' nonroot
+
+COPY ./setup_env.sh /root/
+RUN sed -i -e 's/\\r$//' /root/setup_env.sh
+RUN chmod +x /root/setup_env.sh
+RUN /bin/bash /root/setup_env.sh
+
+WORKDIR /{ENV_NAME}/
+ENV VIRTUAL_ENV=/{ENV_NAME}/.venv
+ENV PATH=/{ENV_NAME}/.venv/bin:/root/.local/bin:$PATH
+"""
 
 
 @dataclass
@@ -26,14 +71,8 @@ class PythonProfile(RepoProfile):
     """
 
     python_version: str = "3.10"
-    install_cmds: list[str] = field(
-        default_factory=lambda: ["python -m pip install -e ."]
-    )
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest --disable-warnings --color=no --tb=no --verbose"
-    )
+    install_cmds: list[str] = field(default_factory=lambda: ["uv pip install -e ."])
+    test_cmd: str = "pytest --disable-warnings --color=no --tb=no --verbose"
     exts: list[str] = field(default_factory=lambda: [".py"])
 
     def get_test_files(self, instance: dict) -> tuple[list[str], list[str]]:
@@ -44,31 +83,28 @@ class PythonProfile(RepoProfile):
         return _helper(instance[FAIL_TO_PASS]), _helper(instance[PASS_TO_PASS])
 
     def build_image(self):
-        BASE_IMAGE_KEY = f"{ORG_NAME_DH}/swesmith.x86_64"
         HEREDOC_DELIMITER = "EOF_59812759871"
-        PATH_TO_REQS = "swesmith_environment.yml"
+        PATH_TO_REQS = "swesmith_environment.txt"
 
-        with open(self._env_yml) as f:
+        with open(self._env_spec) as f:
             reqs = f.read()
 
         setup_commands = [
             "#!/bin/bash",
             "set -euxo pipefail",
+            'export PATH="$HOME/.local/bin:$PATH"',
             f"git clone -o origin {self.mirror_url} /{ENV_NAME}",
             f"cd /{ENV_NAME}",
-            "source /opt/miniconda3/bin/activate",
             f"cat <<'{HEREDOC_DELIMITER}' > {PATH_TO_REQS}\n{reqs}\n{HEREDOC_DELIMITER}",
-            f"conda env create --file {PATH_TO_REQS}",
-            f"conda activate {ENV_NAME} && conda install python={self.python_version} -y",
+            f"uv venv --python {self.python_version} --seed .venv",
+            "source .venv/bin/activate",
+            f"uv pip install -r {PATH_TO_REQS}",
             f"rm {PATH_TO_REQS}",
-            f"conda activate {ENV_NAME}",
-            'echo "Current environment: $CONDA_DEFAULT_ENV"',
         ] + self.install_cmds
 
-        dockerfile = get_dockerfile_env(
-            self.pltf, self.arch, "py", base_image_key=BASE_IMAGE_KEY
+        dockerfile = self._prepare_dockerfile(
+            PYTHON_ENV_DOCKERFILE.format(platform=self.pltf)
         )
-        dockerfile = self._prepare_dockerfile(dockerfile)
 
         env_dir = LOG_DIR_ENV / self.repo_name
         env_dir.mkdir(parents=True, exist_ok=True)
@@ -102,8 +138,8 @@ class PythonProfile(RepoProfile):
         return test_status_map
 
     @property
-    def _env_yml(self) -> Path:
-        return LOG_DIR_ENV / self.repo_name / f"sweenv_{self.repo_name}.yml"
+    def _env_spec(self) -> Path:
+        return LOG_DIR_ENV / self.repo_name / f"sweenv_{self.repo_name}.txt"
 
 
 ### MARK: Repository Profile Classes ###
@@ -128,7 +164,7 @@ class Apispec8b421526(PythonProfile):
     owner: str = "marshmallow-code"
     repo: str = "apispec"
     commit: str = "8b421526ea1015046de42599dd93da6a3473fe44"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[dev]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[dev]"])
 
 
 @dataclass
@@ -158,7 +194,7 @@ class AutogradAc044f0d(PythonProfile):
     repo: str = "autograd"
     commit: str = "ac044f0de1185b725955595840135e9ade06aaed"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -e '.[scipy,test]'"]
+        default_factory=lambda: ["uv pip install -e '.[scipy,test]'"]
     )
 
     def log_parser(self, log: str) -> dict[str, str]:
@@ -198,7 +234,7 @@ class Cantools0c6a7871(PythonProfile):
     owner: str = "cantools"
     repo: str = "cantools"
     commit: str = "0c6a78711409e4307de34582f795ddb426d58dd8"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[dev,plot]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[dev,plot]"])
 
 
 @dataclass
@@ -207,7 +243,7 @@ class ChannelsA144b4b8(PythonProfile):
     repo: str = "channels"
     commit: str = "a144b4b8881a93faa567a6bdf2d7f518f4c16cd2"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -e .[tests,daphne]"]
+        default_factory=lambda: ["uv pip install -e .[tests,daphne]"]
     )
 
 
@@ -275,8 +311,8 @@ class DeepdiffEd252022(PythonProfile):
     commit: str = "ed2520229d0369813f6e54cdf9c7e68e8073ef62"
     install_cmds: list = field(
         default_factory=lambda: [
-            "pip install -r requirements-dev.txt",
-            "pip install -e .",
+            "uv pip install -r requirements-dev.txt",
+            "uv pip install -e .",
         ]
     )
 
@@ -287,7 +323,7 @@ class DjangoMoney835c1ab8(PythonProfile):
     repo: str = "django-money"
     commit: str = "835c1ab867d11137b964b94936692bea67a038ec"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -e .[test,exchange]"]
+        default_factory=lambda: ["uv pip install -e .[test,exchange]"]
     )
 
 
@@ -311,7 +347,7 @@ class DrfNestedRouters6144169d(PythonProfile):
     repo: str = "drf-nested-routers"
     commit: str = "6144169d5c33a1c5134b2fedac1d6cfa312c174e"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -r requirements.txt", "pip install -e ."]
+        default_factory=lambda: ["uv pip install -r requirements.txt", "uv pip install -e ."]
     )
 
 
@@ -320,7 +356,7 @@ class Environs73c372df(PythonProfile):
     owner: str = "sloria"
     repo: str = "environs"
     commit: str = "73c372df71002312615ad0349ae11274bb3edc69"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[dev]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[dev]"])
 
 
 @dataclass
@@ -400,9 +436,9 @@ class FvcoreA491d5b9(PythonProfile):
     commit: str = "a491d5b9a06746f387aca2f1f9c7c7f28e20bef9"
     install_cmds: list = field(
         default_factory=lambda: [
-            "pip install torch shapely",
+            "uv pip install torch shapely",
             "rm tests/test_focal_loss.py",
-            "pip install -e .",
+            "uv pip install -e .",
         ]
     )
 
@@ -419,11 +455,7 @@ class Gpxpy09fc46b3(PythonProfile):
     owner: str = "tkrajina"
     repo: str = "gpxpy"
     commit: str = "09fc46b3cad16b5bf49edf8e7ae873794a959620"
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest test.py --verbose --color=no --tb=no --disable-warnings"
-    )
+    test_cmd: str = "pytest test.py --verbose --color=no --tb=no --disable-warnings"
 
 
 @dataclass
@@ -550,11 +582,7 @@ class MidoA0158ff9(PythonProfile):
     owner: str = "mido"
     repo: str = "mido"
     commit: str = "a0158ff95a08f9a4eef628a2e7c793fd3a466640"
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest --disable-warnings --color=no --tb=no --verbose -rs -c /dev/null"
-    )
+    test_cmd: str = "pytest --disable-warnings --color=no --tb=no --verbose -rs -c /dev/null"
 
     def get_test_files(self, instance: dict) -> list[str]:
         f2p_files, p2p_files = super().get_test_files(instance)
@@ -579,7 +607,7 @@ class Nikola0f4c230e(PythonProfile):
     repo: str = "nikola"
     commit: str = "0f4c230e5159e4e937463eb8d6d2ddfcbb09def2"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -e '.[extras,tests]'"]
+        default_factory=lambda: ["uv pip install -e '.[extras,tests]'"]
     )
 
 
@@ -595,11 +623,7 @@ class Paramiko23f92003(PythonProfile):
     owner: str = "paramiko"
     repo: str = "paramiko"
     commit: str = "23f92003898b060df0e2b8b1d889455264e63a3e"
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest -rA --color=no --disable-warnings"
-    )
+    test_cmd: str = "pytest -rA --color=no --disable-warnings"
 
     def log_parser(self, log: str) -> dict[str, str]:
         test_status_map = {}
@@ -639,7 +663,7 @@ class PatsyA5d16484(PythonProfile):
     owner: str = "pydata"
     repo: str = "patsy"
     commit: str = "a5d1648401b0ea0649b077f4b98da27db947d2d0"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[test]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[test]"])
 
 
 @dataclass
@@ -657,7 +681,7 @@ class Pdfplumber02ff4313(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             "apt-get update && apt-get install ghostscript -y",
-            "pip install -e .",
+            "uv pip install -e .",
         ]
     )
 
@@ -670,7 +694,7 @@ class PipdeptreeC31b6418(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             "apt-get update && apt-get install graphviz -y",
-            "pip install -e .[test,graphviz]",
+            "uv pip install -e .[test,graphviz]",
         ]
     )
 
@@ -800,11 +824,7 @@ class PythonSlugify872b3750(PythonProfile):
     owner: str = "un33k"
     repo: str = "python-slugify"
     commit: str = "872b37509399a7f02e53f46ad9881f63f66d334b"
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "python test.py --verbose"
-    )
+    test_cmd: str = "python test.py --verbose"
 
     def get_test_files(self, instance: dict) -> list[str]:
         return ["test.py"], ["test.py"]
@@ -871,7 +891,7 @@ class Scrapy35212ec5(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             "apt-get update && apt-get install -y libxml2-dev libxslt-dev libjpeg-dev",
-            "python -m pip install -e .",
+            "uv pip install -e .",
             "rm tests/test_feedexport.py",
             "rm tests/test_pipeline_files.py",
         ]
@@ -913,7 +933,7 @@ class Sqlglot036601ba(PythonProfile):
     owner: str = "tobymao"
     repo: str = "sqlglot"
     commit: str = "036601ba9cbe4d175d6a9d38bc27587eab858968"
-    install_cmds: list = field(default_factory=lambda: ['pip install -e ".[dev]"'])
+    install_cmds: list = field(default_factory=lambda: ['uv pip install -e ".[dev]"'])
     min_testing: bool = True
 
 
@@ -951,7 +971,7 @@ class SunpyF8edfd5c(PythonProfile):
     repo: str = "sunpy"
     commit: str = "f8edfd5c4be873fbd28dec4583e7f737a045f546"
     python_version: str = "3.11"
-    install_cmds: list = field(default_factory=lambda: ['pip install -e ".[dev]"'])
+    install_cmds: list = field(default_factory=lambda: ['uv pip install -e ".[dev]"'])
     min_testing: bool = True
 
 
@@ -998,7 +1018,7 @@ class TextdistanceC3aca916(PythonProfile):
     repo: str = "textdistance"
     commit: str = "c3aca916bd756a8cb71114688b469ec90ef5b232"
     install_cmds: list = field(
-        default_factory=lambda: ['pip install -e ".[benchmark,test]"']
+        default_factory=lambda: ['uv pip install -e ".[benchmark,test]"']
     )
 
 
@@ -1028,7 +1048,7 @@ class Tldextract3d1bf184(PythonProfile):
     owner: str = "john-kurkowski"
     repo: str = "tldextract"
     commit: str = "3d1bf184d4f20fbdbadd6274560ccd438939160e"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[testing]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[testing]"])
 
 
 @dataclass
@@ -1043,11 +1063,7 @@ class TornadoD5ac65c1(PythonProfile):
     owner: str = "tornadoweb"
     repo: str = "tornado"
     commit: str = "d5ac65c1f1453c2aeddd089d8e68c159645c13e1"
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "python -m tornado.test --verbose"
-    )
+    test_cmd: str = "python -m tornado.test --verbose"
 
     def get_test_files(self, instance: dict) -> list[str]:
         f2p_files = set()
@@ -1091,7 +1107,7 @@ class Tweepy91a41c6e(PythonProfile):
     repo: str = "tweepy"
     commit: str = "91a41c6e1c955d278c370d51d5cf43b05f7cd979"
     install_cmds: list = field(
-        default_factory=lambda: ["pip install -e '.[dev,test,async]'"]
+        default_factory=lambda: ["uv pip install -e '.[dev,test,async]'"]
     )
 
 
@@ -1100,7 +1116,7 @@ class TypeguardB6a7e438(PythonProfile):
     owner: str = "agronholm"
     repo: str = "typeguard"
     commit: str = "b6a7e4387c30a9f7d635712157c889eb073c1ea3"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[test,doc]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[test,doc]"])
 
 
 @dataclass
@@ -1108,7 +1124,7 @@ class UsaddressA42a8f0c(PythonProfile):
     owner: str = "datamade"
     repo: str = "usaddress"
     commit: str = "a42a8f0c14bd2e273939fd51c604f10826301e73"
-    install_cmds: list = field(default_factory=lambda: ["pip install -e .[dev]"])
+    install_cmds: list = field(default_factory=lambda: ["uv pip install -e .[dev]"])
 
 
 @dataclass
@@ -1165,16 +1181,12 @@ class MypyE93f06ce(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             "git submodule update --init mypy/typeshed || true",
-            "python -m pip install -r test-requirements.txt",
-            "python -m pip install -e .",
+            "uv pip install -r test-requirements.txt",
+            "uv pip install -e .",
             "hash -r",
         ]
     )
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest --color=no -rA -k"
-    )
+    test_cmd: str = "pytest --color=no -rA -k"
     min_testing: bool = True
 
     def get_test_cmd(self, instance: str, f2p_only: bool = False) -> tuple[str, list]:
@@ -1213,15 +1225,11 @@ class MONAIa09c1f08(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             r"sed -i '/^git+https:\/\/github.com\/Project-MONAI\//d' requirements-dev.txt",
-            "python -m pip install -U -r requirements-dev.txt",
-            "python -m pip install -e .",
+            "uv pip install -U -r requirements-dev.txt",
+            "uv pip install -e .",
         ]
     )
-    test_cmd: str = (
-        "source /opt/miniconda3/bin/activate; "
-        f"conda activate {ENV_NAME}; "
-        "pytest --disable-warnings --color=no --tb=no --verbose"
-    )
+    test_cmd: str = "pytest --disable-warnings --color=no --tb=no --verbose"
     min_pregold: bool = True
     min_testing: bool = True
 
@@ -1231,7 +1239,7 @@ class Dvc1d6ea681(PythonProfile):
     owner: str = "iterative"
     repo: str = "dvc"
     commit: str = "1d6ea68133289ceab2637ce7095772678af792c6"
-    install_cmds: list = field(default_factory=lambda: ['pip install -e ".[dev]"'])
+    install_cmds: list = field(default_factory=lambda: ['uv pip install -e ".[dev]"'])
     min_testing: bool = True
 
 
@@ -1243,7 +1251,7 @@ class Hydra0f03eb60(PythonProfile):
     install_cmds: list = field(
         default_factory=lambda: [
             "apt-get update && apt-get install -y openjdk-17-jdk openjdk-17-jre",
-            "pip install -e .",
+            "uv pip install -e .",
         ]
     )
 
@@ -1255,8 +1263,8 @@ class Dask5f61e423(PythonProfile):
     commit: str = "5f61e42324c3a6cd4da17b5d5ebe4663aa4b8783"
     install_cmds: list = field(
         default_factory=lambda: [
-            "python -m pip install graphviz",
-            "python -m pip install -e .",
+            "uv pip install graphviz",
+            "uv pip install -e .",
         ]
     )
     min_testing: bool = True
@@ -1267,7 +1275,7 @@ class Modin8c7799fd(PythonProfile):
     owner: str = "modin-project"
     repo: str = "modin"
     commit: str = "8c7799fdbbc2fb0543224160dd928215852b7757"
-    install_cmds: list = field(default_factory=lambda: ['pip install -e ".[all]"'])
+    install_cmds: list = field(default_factory=lambda: ['uv pip install -e ".[all]"'])
     min_pregold: bool = True
     min_testing: bool = True
 
@@ -1279,16 +1287,12 @@ class PydanticAcb0f10f(PythonProfile):
     commit: str = "acb0f10fda1c78441e052c57b4288bc91431f852"
     install_cmds: list = field(
         default_factory=lambda: [
-            "apt-get update && apt-get install -y locales pipx",
-            "pipx install uv",
-            "pipx install pre-commit",
-            'export PATH="$HOME/.local/bin:$PATH"',
+            "apt-get update && apt-get install -y locales",
+            "uv pip install pre-commit",
             "make install",
         ]
     )
-    test_cmd: str = (
-        "/root/.local/bin/uv run pytest --disable-warnings --color=no --tb=no --verbose"
-    )
+    test_cmd: str = "uv run pytest --disable-warnings --color=no --tb=no --verbose"
 
 
 @dataclass
@@ -1301,10 +1305,10 @@ class Conan86f29e13(PythonProfile):
         + INSTALL_BAZEL
         + [
             "apt-get -y update && apt-get -y upgrade && apt-get install -y build-essential cmake automake autoconf pkg-config meson ninja-build",
-            "python -m pip install -r conans/requirements.txt",
-            "python -m pip install -r conans/requirements_server.txt",
-            "python -m pip install -r conans/requirements_dev.txt",
-            "python -m pip install -e .",
+            "uv pip install -r conans/requirements.txt",
+            "uv pip install -r conans/requirements_server.txt",
+            "uv pip install -r conans/requirements_dev.txt",
+            "uv pip install -e .",
         ]
     )
     min_testing: bool = True
@@ -1319,7 +1323,7 @@ class Pandas95280573(PythonProfile):
         default_factory=lambda: [
             "git remote add upstream https://github.com/pandas-dev/pandas.git",
             "git fetch upstream --tags",
-            "python -m pip install -ve . --no-build-isolation -Ceditable-verbose=true",
+            "uv pip install -ve . --no-build-isolation -Ceditable-verbose=true",
             """sed -i 's/__version__="[^"]*"/__version__="3.0.0.dev0+1992.g95280573e1"/' build/cp310/_version_meson.py""",
         ]
     )
@@ -1341,9 +1345,9 @@ class String2Stringc4a72f59(PythonProfile):
     commit: str = "c4a72f59aafe8db42c4015709078064535dc4191"
     install_cmds: list = field(
         default_factory=lambda: [
-            "pip install -r docs/requirements.txt",
-            "pip install -e .",
-            "pip install pytest",
+            "uv pip install -r docs/requirements.txt",
+            "uv pip install -e .",
+            "uv pip install pytest",
         ]
     )
 
